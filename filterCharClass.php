@@ -18,7 +18,7 @@ if($mysqli->connect_errno) {
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<link rel = "stylesheet" type = "text/css" href = "style.css" />
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-	<script type="text/javascript" src="script.js?v=7"></script>
+	<script type="text/javascript" src="script.js?v=6"></script>
 </head>
 
 <body class = "container">
@@ -38,14 +38,19 @@ if($mysqli->connect_errno) {
 					</tr>
 
 					<?php 
-					//Select the id, name, race, and class of all rows from dnd_character
-					if(!($stmt = $mysqli->prepare("SELECT c.id, c.name, r.name, cl.name, c.level FROM dnd_character c INNER JOIN dnd_race r ON c.race = r.id INNER JOIN dnd_class cl ON c.class = cl.id"))) {
-						echo "Prepare failed: " . $stmt->errno . " " . $stmt->error;
+
+					if(!($stmt = $mysqli->prepare("SELECT c.id, c.name, r.name, cl.name, c.level FROM dnd_character c INNER JOIN dnd_race r ON c.race = r.id INNER JOIN dnd_class cl ON c.class = cl.id WHERE c.class = ?"))) {
+							echo "Prepare failed: " . $stmt->errno . " " . $stmt->error;
+					}
+
+					if(!($stmt->bind_param('i',$_POST['class']))) {
+							echo "bind_param failed: " . $stmt->errno . " " . $stmt->error;
 					}
 
 					if(!($stmt->execute())) {
-						echo "Execute failed: " . $stmt->errno . " " . $stmt->error;
+					 	echo "Execute failed: " . $stmt->errno . " " . $stmt->error;
 					}
+
 					//Takes results of query and sticks them in variables
 					if(!($stmt->bind_result($id, $name, $race, $class, $level))){
 						echo "Bind failed: "  . $stmt->errno . " " . $stmt->error;
@@ -124,15 +129,15 @@ if($mysqli->connect_errno) {
 					<fieldset>
 						Level is =
 						<!-- <select name="expression">
-							<option value="<"> &#60 </option>
-							<option value="="> = </option>
-							<option value=">"> &#62 </option>
+							<option value="<"><</option>
+							<option value="=">=</option>
+							<option value=">">></option>
 						</select> -->
 						<input type="number" name="limit">
 						
 						<input type="submit" name="char_filter">
 					</fieldset>
-				</form>
+				</form>		
 			</div>
 		</div>
 
@@ -164,7 +169,8 @@ if($mysqli->connect_errno) {
 						
 						<input type="submit" name="char_filter_class">
 					</fieldset>
-				</form>
+				</form><br>
+				<button name="return" class="btn btn-warning">No Filter</button>
 			</div>
 		</div><br>
 
@@ -361,7 +367,7 @@ if($mysqli->connect_errno) {
 
 
 		<!-- Give characters a skill, feat, or weapon !-->
-		<h2>Add/Remove from Character</h2>
+		<h2>Equip Character</h2>
 
 		<div class="row">
 			<div class="col-lg-12">
@@ -680,8 +686,6 @@ if($mysqli->connect_errno) {
 				</form>
 			</div>
 		</div>
-
-
 
 	</body>
 </html>
